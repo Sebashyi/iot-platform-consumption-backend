@@ -22,4 +22,9 @@ public interface ConsumptionPerHourRepository extends JpaRepository<ConsumptionP
         @Query("SELECT c FROM ConsumptionPerHour c WHERE c.devEui = :devEui")
         List<ConsumptionPerHour> findByDevEui(@Param("devEui") String devEui);
 
+        @Query("SELECT c FROM ConsumptionPerHour c WHERE c.devEui = :devEui AND c.serial = :serial ORDER BY c.dateConsumption DESC")
+        List<ConsumptionPerHour> findLatestByDevEuiAndSerial(
+                @Param("devEui") String devEui,
+                @Param("serial") String serial);
+
 }
