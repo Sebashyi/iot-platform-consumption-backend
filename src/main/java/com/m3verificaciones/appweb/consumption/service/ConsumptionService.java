@@ -64,7 +64,8 @@ public class ConsumptionService {
     
             consumptionPerHourService.saveConsumptionPerHour(existingRecord, hourlyConsumption);
         } else {
-            ConsumptionPerHour lastRecord = consumptionPerHourRepository.findLatestByDevEuiAndSerial(consumption.getDevEui(), consumption.getSerial());
+            List<ConsumptionPerHour> latestRecords = consumptionPerHourRepository.findLatestByDevEuiAndSerial(consumption.getDevEui(), consumption.getSerial());
+            ConsumptionPerHour lastRecord = latestRecords.isEmpty() ? null : latestRecords.get(0);
 
             BigDecimal hourlyConsumption = BigDecimal.ZERO;
             if (lastRecord != null) {
