@@ -13,8 +13,11 @@ import java.util.List;
 public interface ConsumptionPerHourRepository extends JpaRepository<ConsumptionPerHour, String> {
         ConsumptionPerHour findByDevEuiAndSerial(String devEui, String serial);
 
-        @Query("SELECT c FROM ConsumptionPerHour c WHERE c.devEui = :devEui AND c.serial = :serial ORDER BY c.dateConsumption DESC")
-        List<ConsumptionPerHour> findLatestByDevEuiAndSerial(@Param("devEui") String devEui, @Param("serial") String serial);
+        @Query("SELECT c FROM ConsumptionPerHour c WHERE c.devEui = :devEui AND c.serial = :serial AND c.dateConsumption = :hourlySlot")
+        ConsumptionPerHour findByDevEuiAndSerialAndHour(
+                        @Param("devEui") String devEui,
+                        @Param("serial") String serial,
+                        @Param("hourlySlot") LocalDateTime hourlySlot);
 
         @Query("SELECT c FROM ConsumptionPerHour c WHERE c.devEui = :devEui")
         List<ConsumptionPerHour> findByDevEui(@Param("devEui") String devEui);
