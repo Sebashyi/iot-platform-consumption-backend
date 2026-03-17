@@ -64,16 +64,25 @@ public class ConsumptionService {
     
             consumptionPerHourService.saveConsumptionPerHour(existingRecord, hourlyConsumption);
         } else {
+            ConsumptionPerHour lastRecord = consumptionPerHourRepository.findLatestByDevEuiAndSerial(consumption.getDevEui(), consumption.getSerial());
+
+            BigDecimal hourlyConsumption = BigDecimal.ZERO;
+            if (lastRecord != null) {
+                hourlyConsumption = newConsumptionValue.subtract(lastRecord.getPreviousConsumptionValue());
+                if (hourlyConsumption.compareTo(BigDecimal.ZERO) < 0) {
+                    hourlyConsumption = BigDecimal.ZERO;
+                }
+            }
             ConsumptionPerHour newRecord = new ConsumptionPerHour();
             newRecord.setDevEui(consumption.getDevEui());
             newRecord.setSerial(consumption.getSerial());
             newRecord.setModel(consumption.getModel());
             newRecord.setDiameter(consumption.getDiameter());
             newRecord.setDateConsumption(hourlySlot);
-            newRecord.setHourlyConsumption(BigDecimal.ZERO);
+            newRecord.setHourlyConsumption(hourlyConsumption);
             newRecord.setPreviousConsumptionValue(newConsumptionValue);
-    
-            consumptionPerHourService.saveConsumptionPerHour(newRecord, BigDecimal.ZERO);
+        
+            consumptionPerHourService.saveConsumptionPerHour(newRecord, hourlyConsumption);
         }
     
         return consumption;
