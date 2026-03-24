@@ -18,4 +18,7 @@ public interface ConsumptionPerDayRepository extends JpaRepository<ConsumptionPe
 
     @Query("SELECT c FROM ConsumptionPerDay c WHERE c.devEui = :devEui")
     List<ConsumptionPerDay> findByDevEui(@Param("devEui") String devEui);
+
+    @Query("SELECT c FROM ConsumptionPerDay c WHERE c.devEui IN :devEuis ORDER BY c.dateConsumption DESC")
+    List<ConsumptionPerDay> findByDevEuisOrderByDateDesc(@Param("devEuis") List<String> devEuis);
 }

@@ -3,6 +3,7 @@ package com.m3verificaciones.appweb.consumption.service;
 import com.m3verificaciones.appweb.consumption.exception.*;
 import com.m3verificaciones.appweb.consumption.repository.ConsumptionPerDayRepository;
 import com.m3verificaciones.appweb.consumption.model.ConsumptionPerDay;
+import com.m3verificaciones.appweb.consumption.repository.MeterRepository;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -15,11 +16,14 @@ import org.springframework.transaction.annotation.Transactional;
 public class ConsumptionPerDayService {
     private final ConsumptionPerDayRepository consumptionPerDayRepository;
     private final ConsumptionPerMonthService consumptionPerMonthService;
+    private final MeterRepository meterRepository;
 
     public ConsumptionPerDayService(ConsumptionPerDayRepository consumptionPerDayRepository,
-            ConsumptionPerMonthService consumptionPerMonthService) {
+            ConsumptionPerMonthService consumptionPerMonthService,
+            MeterRepository meterRepository) {
         this.consumptionPerMonthService = consumptionPerMonthService;
         this.consumptionPerDayRepository = consumptionPerDayRepository;
+        this.meterRepository = meterRepository;
     }
 
     @Transactional
@@ -125,6 +129,35 @@ public class ConsumptionPerDayService {
             return records;
         } catch (Exception e) {
             throw new ConsumptionPersistenceException("retrieval by devEui", e);
+        }
+    }
+
+    public List<ConsumptionPerDay> getConsumptionsByCompany(String companyUniqueKey) {
+        List<String> devEuis = meterRepository.findByCompanyUniqueKey(companyUniqueKey)
+                .stream()
+                .map(com.m3verificaciones.appweb.consumption.model.Meter::getDevEui)
+                .filter(devEui -> devEui != null && !devEui.isBlank())
+                .distinct()
+                .toList();
+
+        if (devEuis.isEmpty()) {
+            throw new ConsumptionNoResultsException(
+                    "No meters found for company: " + companyUniqueKey);
+        }
+
+        try {
+            List<ConsumptionPerDay> results = consumptionPerDayRepository.findByDevEuisOrderByDateDesc(devEuis);
+
+            if (results.isEmpty()) {
+                throw new ConsumptionNoResultsException(
+                        "No consumption records found for the meters of company: " + companyUniqueKey);
+            }
+
+            return results;
+        } catch (ConsumptionNoResultsException e) {
+            throw e;
+        } catch (Exception e) {
+            throw new ConsumptionPersistenceException("retrieval by company", e);
         }
     }
 }

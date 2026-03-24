@@ -248,4 +248,16 @@ public class ConsumptionPerDayController {
                     .body(("Error generating Excel file: " + e.getMessage()).getBytes());
         }
     }
+
+    @Operation(summary = "Get daily consumptions by company", description = "Returns daily consumptions for all meters belonging to a company, ordered by date DESC")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Successfully retrieved daily consumptions", content = @Content(schema = @Schema(implementation = ConsumptionPerDay.class))),
+            @ApiResponse(responseCode = "404", description = "No meters or consumptions found for the company"),
+            @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
+    @GetMapping("/by-company/{companyUniqueKey}")
+    public ResponseEntity<?> getConsumptionsPerDayByCompany(@PathVariable String companyUniqueKey) {
+        List<ConsumptionPerDay> results = consumptionPerDayService.getConsumptionsByCompany(companyUniqueKey);
+        return ResponseEntity.ok(results);
+    }
 }

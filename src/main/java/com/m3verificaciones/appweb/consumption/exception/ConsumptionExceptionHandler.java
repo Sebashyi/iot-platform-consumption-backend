@@ -40,4 +40,14 @@ public class ConsumptionExceptionHandler {
         body.put("message", ex.getMessage());
         return new ResponseEntity<>(body, ex.getStatus());
     }
+
+    @ExceptionHandler(ConsumptionNoResultsException.class)
+    public ResponseEntity<Map<String, Object>> handleConsumptionNoResults(ConsumptionNoResultsException ex) {
+        Map<String, Object> body = new HashMap<>();
+        body.put("timestamp", LocalDateTime.now());
+        body.put("status", ex.getStatus().value());
+        body.put("error", "No Consumption Results");
+        body.put("message", ex.getMessage());
+        return new ResponseEntity<>(body, ex.getStatus());
+    }
 }
