@@ -3,7 +3,6 @@ package com.m3verificaciones.appweb.consumption.service;
 import com.m3verificaciones.appweb.consumption.exception.*;
 import com.m3verificaciones.appweb.consumption.repository.ConsumptionPerHourRepository;
 import com.m3verificaciones.appweb.consumption.repository.MeterRepository;
-import com.m3verificaciones.appweb.consumption.model.ConsumptionPerDay;
 import com.m3verificaciones.appweb.consumption.model.ConsumptionPerHour;
 
 import java.util.List;

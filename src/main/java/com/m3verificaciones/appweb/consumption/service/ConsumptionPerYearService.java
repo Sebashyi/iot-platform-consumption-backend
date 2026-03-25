@@ -2,7 +2,9 @@ package com.m3verificaciones.appweb.consumption.service;
 
 import com.m3verificaciones.appweb.consumption.exception.*;
 import com.m3verificaciones.appweb.consumption.repository.ConsumptionPerYearRepository;
+import com.m3verificaciones.appweb.consumption.model.ConsumptionPerDay;
 import com.m3verificaciones.appweb.consumption.model.ConsumptionPerYear;
+import com.m3verificaciones.appweb.consumption.repository.MeterRepository;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -14,9 +16,12 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class ConsumptionPerYearService {
     private final ConsumptionPerYearRepository consumptionPerYearRepository;
+    private final MeterRepository meterRepository;
 
-    public ConsumptionPerYearService(ConsumptionPerYearRepository consumptionPerYearRepository) {
+    public ConsumptionPerYearService(ConsumptionPerYearRepository consumptionPerYearRepository,
+            MeterRepository meterRepository) {
         this.consumptionPerYearRepository = consumptionPerYearRepository;
+        this.meterRepository = meterRepository;
     }
 
     @Transactional
@@ -66,7 +71,7 @@ public class ConsumptionPerYearService {
                         existing.setYearlyConsumption(updatedConsumptionPerYear.getYearlyConsumption());
                         existing.setPreviousConsumptionValue(updatedConsumptionPerYear.getPreviousConsumptionValue());
                         // ... otros campos que se puedan actualizar
-                        
+
                         return consumptionPerYearRepository.save(existing);
                     } catch (Exception e) {
                         throw new ConsumptionPersistenceException("yearly consumption update", e);
@@ -76,12 +81,13 @@ public class ConsumptionPerYearService {
     }
 
     @Transactional
-    public void saveOrUpdateConsumptionPerYear(String devEui, String serial, LocalDateTime dateConsumption, 
+    public void saveOrUpdateConsumptionPerYear(String devEui, String serial, LocalDateTime dateConsumption,
             String model, String diameter, BigDecimal monthlyConsumption) {
         try {
             LocalDateTime startOfYear = dateConsumption.withDayOfYear(1).toLocalDate().atStartOfDay();
 
-            ConsumptionPerYear existingRecord = consumptionPerYearRepository.findByDevEuiAndSerialAndYear(devEui, serial,
+            ConsumptionPerYear existingRecord = consumptionPerYearRepository.findByDevEuiAndSerialAndYear(devEui,
+                    serial,
                     startOfYear);
 
             if (existingRecord != null) {
@@ -114,6 +120,35 @@ public class ConsumptionPerYearService {
             return records;
         } catch (Exception e) {
             throw new ConsumptionPersistenceException("yearly consumptions retrieval by devEui", e);
+        }
+    }
+
+    public List<ConsumptionPerYear> getConsumptionsByCompany(String companyUniqueKey) {
+        List<String> devEuis = meterRepository.findByCompanyUniqueKey(companyUniqueKey)
+                .stream()
+                .map(com.m3verificaciones.appweb.consumption.model.Meter::getDevEui)
+                .filter(devEui -> devEui != null && !devEui.isBlank())
+                .distinct()
+                .toList();
+
+        if (devEuis.isEmpty()) {
+            throw new ConsumptionNoResultsException(
+                    "No meters found for company: " + companyUniqueKey);
+        }
+
+        try {
+            List<ConsumptionPerYear> results = consumptionPerYearRepository.findByDevEuisOrderByDateDesc(devEuis);
+
+            if (results.isEmpty()) {
+                throw new ConsumptionNoResultsException(
+                        "No consumption records found for the meters of company: " + companyUniqueKey);
+            }
+
+            return results;
+        } catch (ConsumptionNoResultsException e) {
+            throw e;
+        } catch (Exception e) {
+            throw new ConsumptionPersistenceException("retrieval by company", e);
         }
     }
 }

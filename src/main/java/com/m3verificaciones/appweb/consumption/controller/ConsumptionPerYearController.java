@@ -20,6 +20,7 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import com.m3verificaciones.appweb.consumption.service.ConsumptionPerYearService;
 import com.m3verificaciones.appweb.consumption.util.excell.ExcelStyleUtil;
 import com.m3verificaciones.appweb.consumption.dto.ExcelExportRequestDTO;
+import com.m3verificaciones.appweb.consumption.model.ConsumptionPerDay;
 import com.m3verificaciones.appweb.consumption.model.ConsumptionPerYear;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -298,5 +299,17 @@ public class ConsumptionPerYearController {
                 cell.setCellStyle(dataStyle);
                 break;
         }
+    }
+
+    @Operation(summary = "Get yearly consumptions by company", description = "Returns yearly consumptions for all meters belonging to a company, ordered by date DESC")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Successfully retrieved daily consumptions", content = @Content(schema = @Schema(implementation = ConsumptionPerDay.class))),
+            @ApiResponse(responseCode = "404", description = "No meters or consumptions found for the company"),
+            @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
+    @GetMapping("/by-company/{companyUniqueKey}")
+    public ResponseEntity<?> getConsumptionsPerYearByCompany(@PathVariable String companyUniqueKey) {
+        List<ConsumptionPerYear> results = consumptionPerYearService.getConsumptionsByCompany(companyUniqueKey);
+        return ResponseEntity.ok(results);
     }
 }

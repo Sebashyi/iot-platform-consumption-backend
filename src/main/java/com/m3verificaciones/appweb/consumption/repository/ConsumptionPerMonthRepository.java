@@ -18,4 +18,7 @@ public interface ConsumptionPerMonthRepository extends JpaRepository<Consumption
 
     @Query("SELECT c FROM ConsumptionPerMonth c WHERE c.devEui = :devEui")
     List<ConsumptionPerMonth> findByDevEui(@Param("devEui") String devEui);
+
+    @Query("SELECT c FROM ConsumptionPerMonth c WHERE c.devEui IN :devEuis ORDER BY c.dateConsumption DESC")
+    List<ConsumptionPerMonth> findByDevEuisOrderByDateDesc(@Param("devEuis") List<String> devEuis);
 }

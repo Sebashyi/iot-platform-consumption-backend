@@ -20,6 +20,7 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import com.m3verificaciones.appweb.consumption.service.ConsumptionPerMonthService;
 import com.m3verificaciones.appweb.consumption.util.excell.ExcelStyleUtil;
 import com.m3verificaciones.appweb.consumption.dto.ExcelExportRequestDTO;
+import com.m3verificaciones.appweb.consumption.model.ConsumptionPerDay;
 import com.m3verificaciones.appweb.consumption.model.ConsumptionPerMonth;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -268,5 +269,17 @@ public class ConsumptionPerMonthController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(("Error generating Excel file: " + e.getMessage()).getBytes());
         }
+    }
+
+    @Operation(summary = "Get monthly consumptions by company", description = "Returns monthly consumptions for all meters belonging to a company, ordered by date DESC")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Successfully retrieved daily consumptions", content = @Content(schema = @Schema(implementation = ConsumptionPerDay.class))),
+            @ApiResponse(responseCode = "404", description = "No meters or consumptions found for the company"),
+            @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
+    @GetMapping("/by-company/{companyUniqueKey}")
+    public ResponseEntity<?> getConsumptionsPerMonthByCompany(@PathVariable String companyUniqueKey) {
+        List<ConsumptionPerMonth> results = consumptionPerMonthService.getConsumptionsByCompany(companyUniqueKey);
+        return ResponseEntity.ok(results);
     }
 }

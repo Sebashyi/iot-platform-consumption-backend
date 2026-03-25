@@ -6,7 +6,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
-import com.m3verificaciones.appweb.consumption.model.ConsumptionPerDay;
 import com.m3verificaciones.appweb.consumption.model.ConsumptionPerHour;
 
 import java.util.List;
