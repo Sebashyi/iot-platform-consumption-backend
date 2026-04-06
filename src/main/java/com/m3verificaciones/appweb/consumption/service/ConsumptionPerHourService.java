@@ -98,6 +98,8 @@ public class ConsumptionPerHourService {
                 throw new ConsumptionNotFoundException("hourly consumptions for devEui: " + devEui);
             }
             return records;
+        } catch (ConsumptionNotFoundException e) {
+            throw e;
         } catch (Exception e) {
             throw new ConsumptionPersistenceException("hourly consumptions retrieval by devEui", e);
         }
