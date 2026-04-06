@@ -13,6 +13,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 import com.m3verificaciones.appweb.consumption.service.ConsumptionPerDayService;
 import com.m3verificaciones.appweb.consumption.util.excell.ExcelStyleUtil;
 import com.m3verificaciones.appweb.consumption.model.ConsumptionPerDay;
+import com.m3verificaciones.appweb.consumption.model.ConsumptionPerHour;
+
 import org.springframework.web.bind.annotation.GetMapping;
 import java.util.List;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -26,6 +28,8 @@ import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 import com.m3verificaciones.appweb.consumption.dto.ExcelExportRequestDTO;
+import com.m3verificaciones.appweb.consumption.exception.ConsumptionNoResultsException;
+
 import java.util.Map;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -124,7 +128,7 @@ public class ConsumptionPerDayController {
             @ApiResponse(responseCode = "500", description = "Internal server error")
     })
     @GetMapping("/by-devEui")
-    public ResponseEntity<?> getConsumptionsPerDayByDevEui(@RequestParam String devEui) {
+    public ResponseEntity<?> getConsumptionsByDevEui(@RequestParam String devEui) {
         try {
             if (devEui == null || devEui.trim().isEmpty()) {
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST)
@@ -133,12 +137,14 @@ public class ConsumptionPerDayController {
 
             List<ConsumptionPerDay> results = consumptionPerDayService.getConsumptionsByDevEui(devEui);
 
-            if (results.isEmpty()) {
-                return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                        .body("No records found for the provided DevEUI");
-            }
-
             return ResponseEntity.ok(results);
+
+        } catch (ConsumptionNoResultsException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(e.getMessage());
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body("Invalid argument: " + e.getMessage());
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body("Error processing request: " + e.getMessage());
