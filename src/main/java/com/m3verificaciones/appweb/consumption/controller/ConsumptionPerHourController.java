@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import com.m3verificaciones.appweb.consumption.service.ConsumptionPerHourService;
 import com.m3verificaciones.appweb.consumption.util.excell.ExcelStyleUtil;
 import com.m3verificaciones.appweb.consumption.dto.ExcelExportRequestDTO;
+import com.m3verificaciones.appweb.consumption.exception.ConsumptionNoResultsException;
 import com.m3verificaciones.appweb.consumption.model.ConsumptionPerDay;
 import com.m3verificaciones.appweb.consumption.model.ConsumptionPerHour;
 
@@ -159,12 +160,11 @@ public class ConsumptionPerHourController {
 
             List<ConsumptionPerHour> results = consumptionPerHourService.getConsumptionsByDevEui(devEui);
 
-            if (results == null || results.isEmpty()) {
-                return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                        .body("No records found for the provided DevEUI: " + devEui);
-            }
-
             return ResponseEntity.ok(results);
+
+        } catch (ConsumptionNoResultsException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(e.getMessage());
         } catch (IllegalArgumentException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                     .body("Invalid argument: " + e.getMessage());
