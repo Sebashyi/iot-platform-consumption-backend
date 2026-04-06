@@ -129,26 +129,12 @@ public class ConsumptionPerDayController {
     })
     @GetMapping("/by-devEui")
     public ResponseEntity<?> getConsumptionsByDevEui(@RequestParam String devEui) {
-        try {
-            if (devEui == null || devEui.trim().isEmpty()) {
-                return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                        .body("DevEUI parameter is required");
-            }
-
-            List<ConsumptionPerDay> results = consumptionPerDayService.getConsumptionsByDevEui(devEui);
-
-            return ResponseEntity.ok(results);
-
-        } catch (ConsumptionNoResultsException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body(e.getMessage());
-        } catch (IllegalArgumentException e) {
+        if (devEui == null || devEui.trim().isEmpty()) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body("Invalid argument: " + e.getMessage());
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body("Error processing request: " + e.getMessage());
+                    .body("DevEUI parameter is required");
         }
+        List<ConsumptionPerDay> results = consumptionPerDayService.getConsumptionsByDevEui(devEui);
+        return ResponseEntity.ok(results);
     }
 
     @Operation(summary = "Export daily consumptions to Excel", description = "Exports selected daily consumption data to an Excel file")

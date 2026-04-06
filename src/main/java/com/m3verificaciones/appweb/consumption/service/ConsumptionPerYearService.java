@@ -2,7 +2,6 @@ package com.m3verificaciones.appweb.consumption.service;
 
 import com.m3verificaciones.appweb.consumption.exception.*;
 import com.m3verificaciones.appweb.consumption.repository.ConsumptionPerYearRepository;
-import com.m3verificaciones.appweb.consumption.model.ConsumptionPerDay;
 import com.m3verificaciones.appweb.consumption.model.ConsumptionPerYear;
 import com.m3verificaciones.appweb.consumption.repository.MeterRepository;
 
@@ -118,6 +117,8 @@ public class ConsumptionPerYearService {
                 throw new ConsumptionNotFoundException("yearly consumptions for devEui: " + devEui);
             }
             return records;
+        } catch (ConsumptionNotFoundException e) {
+            throw e;
         } catch (Exception e) {
             throw new ConsumptionPersistenceException("yearly consumptions retrieval by devEui", e);
         }

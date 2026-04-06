@@ -171,25 +171,13 @@ public class ConsumptionPerYearController {
             @ApiResponse(responseCode = "500", description = "Internal server error")
     })
     @GetMapping("/by-devEui")
-    public ResponseEntity<?> getConsumptionsPerYearByDevEui(@RequestParam String devEui) {
-        try {
-            if (devEui == null || devEui.trim().isEmpty()) {
-                return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                        .body("DevEUI parameter is required");
-            }
-
-            List<ConsumptionPerYear> results = consumptionPerYearService.getConsumptionsByDevEui(devEui);
-
-            if (results.isEmpty()) {
-                return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                        .body("No records found for the provided DevEUI: " + devEui);
-            }
-
-            return ResponseEntity.ok(results);
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body("Error processing request: " + e.getMessage());
+    public ResponseEntity<?> getConsumptionsByDevEui(@RequestParam String devEui) {
+        if (devEui == null || devEui.trim().isEmpty()) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body("DevEUI parameter is required");
         }
+        List<ConsumptionPerYear> results = consumptionPerYearService.getConsumptionsByDevEui(devEui);
+        return ResponseEntity.ok(results);
     }
 
     @Operation(summary = "Export yearly consumptions to Excel", description = "Exports selected yearly consumption data to an Excel file")

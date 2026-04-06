@@ -124,11 +124,13 @@ public class ConsumptionPerDayService {
         try {
             List<ConsumptionPerDay> records = consumptionPerDayRepository.findByDevEui(devEui);
             if (records.isEmpty()) {
-                throw new ConsumptionNotFoundException("for devEui: " + devEui);
+                throw new ConsumptionNotFoundException("daily consumptions for devEui: " + devEui);
             }
             return records;
+        } catch (ConsumptionNotFoundException e) {
+            throw e;
         } catch (Exception e) {
-            throw new ConsumptionPersistenceException("retrieval by devEui", e);
+            throw new ConsumptionPersistenceException("daily consumptions retrieval by devEui", e);
         }
     }
 
